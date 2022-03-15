@@ -2,21 +2,21 @@ package com.icy.xiaohongshucompose
 
 import android.graphics.Paint
 import android.os.Bundle
+import android.util.Log.d
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.Indicator
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,7 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.icy.xiaohongshucompose.ui.theme.XiaohongshuComposeTheme
+import com.icy.xiaohongshucompose.ui.widget.StaggeredVerticalGrid
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -53,13 +56,24 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             XiaohongshuComposeTheme {
-                var selectedIndex: Int by remember { mutableStateOf(0) }
-                Scaffold(bottomBar = {
-                    BottomBar(selectedIndex) {
-                        selectedIndex = it
-                    }
-                }) {
+                var topTabIndex by remember { mutableStateOf(0) }
+                var toolTabIndex by remember { mutableStateOf(0) }
+                var bottomTabIndex: Int by remember { mutableStateOf(0) }
+                Scaffold(
+                    topBar = {
+                        TopAppBar(topTabIndex) {
+                            topTabIndex = it
+                        }
+                    },
+                    bottomBar = {
+                        BottomBar(bottomTabIndex) {
+                            bottomTabIndex = it
+                        }
+                    }) {
 
+                    Content(toolTabIndex) {
+                        toolTabIndex = it
+                    }
                 }
             }
         }
@@ -68,7 +82,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TopAppBar(selectedIndex: Int, onSelectedChanged: (index: Int) -> Unit) {
-    Column{
+    Column {
         TopAppBar(
             backgroundColor = MaterialTheme.colors.background,
             elevation = 0.dp
@@ -188,6 +202,77 @@ fun selectTextStyle(isSelected: Boolean): TextStyle = if (isSelected) {
 }
 
 @Composable
+fun discoverContent() {
+    val pics = listOf(
+        "https://ci.xiaohongshu.com/bw1/350af518-85c1-42f6-b3a1-04213f311896?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/2d68329c-4c8a-4112-8a7d-9038af7598d5?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/350af518-85c1-42f6-b3a1-04213f311896?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/2d68329c-4c8a-4112-8a7d-9038af7598d5?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/350af518-85c1-42f6-b3a1-04213f311896?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/2d68329c-4c8a-4112-8a7d-9038af7598d5?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/350af518-85c1-42f6-b3a1-04213f311896?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center",
+        "https://ci.xiaohongshu.com/bw1/2d68329c-4c8a-4112-8a7d-9038af7598d5?imageMogr2/format/jpg/quality/92/auto-orient/strip/crop/450x600/gravity/center"
+    )
+    val descs = listOf(
+        "气泡酒，还是草本茶， Whatever 好喝好喝🍺",
+        "减脂期也能吃的甜甜圈🍵",
+        "气泡酒，还是草本茶， Whatever 好喝好喝🍺",
+        "减脂期也能吃的甜甜圈🍵",
+        "气泡酒，还是草本茶， Whatever 好喝好喝🍺",
+        "减脂期也能吃的甜甜圈🍵",
+        "气泡酒，还是草本茶， Whatever 好喝好喝🍺",
+        "减脂期也能吃的甜甜圈🍵",
+    )
+    val avatars = listOf(
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+        "https://sns-avatar-qc.xhscdn.com/avatar/620376f3fc01b139c3bd0d0c.jpg?imageView2/1/w/540/format/jpg",
+    )
+    val names = listOf("好喝鬼", "好吃鬼", "好喝鬼", "好吃鬼", "好喝鬼", "好吃鬼", "好喝鬼", "好吃鬼")
+    pics.mapIndexed { i, _ -> discoverContentItem(pics[i], descs[i], avatars[i], names[i], 99) }
+}
+
+@Composable
+fun discoverContentItem(pic: String, desc: String, avatar: String, name: String, like: Int) {
+    Column(modifier = Modifier.padding(2.dp, 5.dp)) {
+        AsyncImage(
+            model = pic,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier.clip(RoundedCornerShape(5.dp)).fillMaxWidth()
+        )
+        Text(text = desc)
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                AsyncImage(
+                    model = avatar, contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.clip(CircleShape).size(30.dp)
+                )
+                Text(name)
+            }
+            Icon(
+                Icons.Default.Star, "like",
+                modifier = Modifier.background(Color.White).width(20.dp),
+                tint = Color(0x85000000)
+            )
+            Text("$like")
+
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 fun Content(selectedIndex: Int, onSelectedChanged: (index: Int) -> Unit) {
     val toolbarHeight = 48.dp
     val toolbarHeightPx = with(LocalDensity.current) { toolbarHeight.roundToPx().toFloat() }
@@ -201,21 +286,27 @@ fun Content(selectedIndex: Int, onSelectedChanged: (index: Int) -> Unit) {
             }
         }
     }
+
     Box(
         Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
     ) {
-        LazyColumn(contentPadding = PaddingValues(top = toolbarHeight)) {
-            items(100) { index ->
-                Text("I'm item $index", modifier = Modifier.fillMaxWidth().padding(16.dp))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            StaggeredVerticalGrid(
+                modifier = Modifier.padding(top = toolbarHeight, start = 2.dp, end = 2.dp),
+                maxColumnWidth = 300.dp
+            ) {
+                discoverContent()
             }
         }
-
         Box(
             modifier = Modifier
                 .height(toolbarHeight)
-                .padding(vertical = 10.dp)
                 .offset { IntOffset(x = 0, y = toolbarOffsetHeightPx.value.roundToInt()) },
         ) {
             CustomScrollableTabRow(
@@ -241,9 +332,12 @@ fun Content(selectedIndex: Int, onSelectedChanged: (index: Int) -> Unit) {
                     "心理",
                     "潮鞋"
                 ).forEachIndexed { index, s ->
-                    Tab(selected = selectedIndex == index, onClick = {
-                        onSelectedChanged(index)
-                    }) {
+                    Tab(
+                        selected = selectedIndex == index, onClick = {
+                            onSelectedChanged(index)
+                        },
+                        modifier = Modifier.fillMaxHeight()
+                    ) {
                         Text(
                             s,
                             style = selectTextStyle(selectedIndex == index).copy(fontSize = 15.sp),
@@ -251,7 +345,7 @@ fun Content(selectedIndex: Int, onSelectedChanged: (index: Int) -> Unit) {
                     }
                 }
             }
-            Row(modifier = Modifier.align(Alignment.TopEnd)) {
+            Row(modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 10.dp)) {
                 Box(
                     modifier = Modifier.width(30.dp).fillMaxHeight().background(
                         Brush.horizontalGradient(
